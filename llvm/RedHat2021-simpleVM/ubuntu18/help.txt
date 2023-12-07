@@ -1,0 +1,26 @@
+clang-8 -emit-llvm -S exp.c -o exp.ll
+./opt-8 -load ./VMPass.so -VMPass exp.ll
+
+gdb:
+set args -load ./VMPass.so -VMPass ./exp.ll
+#b main
+#b *(0x4b8d5d)
+
+b *(0x4bb7e3)
+
+#runOnFunction
+b *(0x7ffff2396000+0x6B80) 
+b *(0x7ffff239cb80)
+
+b *(0x7ffff2396000+0x73EE)
+b *(0x7ffff239d3ee)
+x/gx 0x77e100
+
+exp:
+b *(0x00007ffff33412fc) #libc-2.27.so one_gadget
+exp1:
+b *(0x00007ffff3286420) #libc-2.27.so system
+
+
+libLLVM-8.so.1 [llvm::FPPassManager::runOnFunction(llvm::Function&)+1351   call   free@plt]
+->libc-2.27.so [free]

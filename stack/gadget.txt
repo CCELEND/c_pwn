@@ -1,0 +1,57 @@
+
+(Ubuntu GLIBC 2.27-3ubuntu1)===============================
+
+do_system = libcbase + 0x4f45b # <system+27>    call   do_system
+syscall_ret = libcbase + 0xd2975 # syscall ; ret
+prdx_ret = libcbase + 0x1306b4 # pop rdx ; pop r10 ; ret
+prdi_ret = libcbase + 0x2155f  # pop rdi ; ret
+prsi_ret = libcbase + 0x23e6a  # pop rsi ; ret
+prax_ret = libcbase + 0x439c8  # pop rax ; ret
+prbp_ret = libcbase + 0x21353  # pop rbp ; ret
+ret = prdi_ret + 1 # ret
+binsh_addr = libcbase + 0x1b3e9a
+
+
+(Ubuntu GLIBC 2.27-3ubuntu1.6)=============================
+
+do_system = libcbase + 0x4f43b # <system+27>    call   do_system
+syscall_ret = libcbase + 0xd2625 # syscall ; ret
+prdx_ret = libcbase + 0x130514 # pop rdx ; pop r10 ; ret
+prdi_ret = libcbase + 0x2164f  # pop rdi ; ret
+prsi_ret = libcbase + 0x23a6a  # pop rsi ; ret
+prax_ret = libcbase + 0x1b500  # pop rax ; ret
+prbp_ret = libcbase + 0x213e3  # pop rbp ; ret
+ret = prdi_ret + 1 # ret
+binsh_addr = libcbase + 0x1b3d88
+
+mprotect = libcbase + 0x11b7e0 #__mprotect
+
+
+(Ubuntu GLIBC 2.35-0ubuntu3)===============================
+
+do_system = libcbase + 0x50d7b # <system+27>    call   do_system
+syscall_ret = libcbase + 0x91396 # syscall; ret;
+prdx_ret = libcbase + 0x11f497 # pop rdx ; pop r12 ; ret
+prdi_ret = libcbase + 0x2a3e5  # pop rdi ; ret
+prsi_ret = libcbase + 0x2be51  # pop rsi ; ret
+prax_ret = libcbase + 0x45eb0  # pop rax ; ret
+prbp_ret = libcbase + 0x2a2e0  # pop rbp ; ret
+ret = prdi_ret + 1 # ret
+binsh_addr = libcbase + 0x1b3d88
+
+mprotect = libcbase + 0x11ec50 #__mprotect
+
+
+(Debian GLIBC 2.35-4)======================================
+
+do_system = libcbase + 0x4a4ab # <system+27>    call   do_system
+syscall_ret = libcbase + 0x846c2 # syscall ; ret
+prdx_ret = libcbase + 0x104283 # pop rdx ; pop r12 ; ret
+prdi_ret = libcbase + 0x2978d  # pop rdi ; ret
+prsi_ret = libcbase + 0x2aea9  # pop rsi ; ret
+prax_ret = libcbase + 0x40808  # pop rax ; ret
+prbp_ret = libcbase + 0x2969c  # pop rbp ; ret
+ret = prdi_ret + 1 # ret
+binsh_addr = libcbase + 0x1b3115
+
+

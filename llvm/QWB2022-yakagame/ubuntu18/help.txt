@@ -1,0 +1,23 @@
+
+clang-8 -emit-llvm -S exp.c -o exp.ll
+./opt-8 -load ./yaka.so -ayaka exp.ll
+
+0x2169A8：cmd
+
+0x2169B0：score
+
+0x2169C0：weaponlist
+
+gdb:
+set args -load ./yaka.so -ayaka exp.ll
+b *(0x4bb7e3) #call   llvm::legacy::PassManager::run(llvm::Module&)@plt
+r
+si
+b *(0xD19E+0x7ffff238d000) 
+c
+c
+x/16gx 0x2169A8+0x7ffff238d000 #cmd
+c
+c
+c
+x/16gx 0x2169A8+0x7ffff238d000

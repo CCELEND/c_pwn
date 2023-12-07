@@ -1,0 +1,16 @@
+
+clang-8 -emit-llvm -S exp.c -o exp.ll
+./opt -load ./SAPass.so -SAPass exp.ll
+
+gdb:
+set args -load ./SAPass.so -SAPass exp.ll
+
+b *(0x4bb7e3)
+
+#b *(0x7ffff23a0000+0x1CBD) #malloc
+b *(0x7ffff23a0000+0x1CE7) #memcpy
+
+
+0x7ffff3622cb0-0x7ffff3237000 = 0x3ebcb0
+libc-2.27.so：one_gadget = 0x10a2fc
+one_gadget-0x3ebcb0 = -0x2E19b4

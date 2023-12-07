@@ -1,0 +1,1 @@
+printf 函数的返回地址在 rsp 中，如果我们预先将 rbp 那里修改为 one_gdaget ，再利用格式化字符串修改 printf 函数地址最后一个字节为 \xb1 ，那么，就会在 pop 之后 ret 到 one_gdaget ，以此 get shell
